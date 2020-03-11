@@ -2,7 +2,7 @@
 
 Project example for a web service class.
 
-## Requirements
+## Requerido
 
     Node 10+
     Baixar em: https://nodejs.org
