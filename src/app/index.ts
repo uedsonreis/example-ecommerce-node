@@ -5,9 +5,10 @@ import helmet from 'helmet';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
+import env from './env';
 import router from './router';
 
-class AppController {
+class ServiceApp {
 
     public express: express.Express;
 
@@ -29,6 +30,10 @@ class AppController {
     private configRoutes(): void {
         this.express.use('/api', router);
     }
+
+    public startService(): void {
+        this.express.listen(env.portServer, () => console.log("Serviço rodando na porta %s!", env.portServer));
+    }
 }
 
-export default new AppController().express;
+export default new ServiceApp();

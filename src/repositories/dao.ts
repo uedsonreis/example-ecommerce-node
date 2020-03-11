@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize-typescript';
 
-import env from '../config/env';
+import env from '../app/env';
 import { User } from '../entities/user';
 import { ModelCtor } from 'sequelize/types';
 
