@@ -1,8 +1,11 @@
 import { Sequelize } from 'sequelize-typescript';
+import { ModelCtor } from 'sequelize/types';
 
 import env from '../app/env';
 import { User } from '../entities/user';
-import { ModelCtor } from 'sequelize/types';
+import { Factory } from '../entities/factory';
+import { Product } from '../entities/product';
+import { Customer } from '../entities/customer';
 
 class DataAccessObject {
 
@@ -21,12 +24,24 @@ class DataAccessObject {
         });
 
         this.sequelize.addModels([
-            User
+            User, Factory, Product, Customer
         ]);
     }
 
     public getUserRepository(): ModelCtor<User> {
         return User;
+    }
+
+    public getFactoryRepository(): ModelCtor<Factory> {
+        return Factory;
+    }
+
+    public getProductRepository(): ModelCtor<Product> {
+        return Product;
+    }
+
+    public getCustomerRepository(): ModelCtor<Customer> {
+        return Customer;
     }
 
 }

@@ -28,7 +28,7 @@ class ServiceApp {
     }
 
     private configRoutes(): void {
-        this.express.use('/api', router);
+        this.express.use('/', router);
     }
 
     public startService(): void {
