@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 
 import { User } from '../entities/user';
 import dao from '../repositories/dao';
-import tokenManager from '../app/token.manager';
+import securityGuard from '../app/security.guard';
 import { Customer } from '../entities/customer';
 
 class UserService {
@@ -22,22 +22,18 @@ class UserService {
 
     public async login(user: User): Promise<string | null> {
 
-        const result = await this.getOneByLogin(user.login);
+        const result: any = await this.getOneByLogin(user.login);
 
         if (result === undefined || result === null) return null;
 
-        const userDB: User = result as User;
+        const userDB: User = result.dataValues as User;
 
         if (!bcrypt.compareSync(user.password, userDB.password)) return null;
 
-        return this.generateToken(user);
+        return securityGuard.generateToken(userDB);
     }
 
-    public generateToken(user: User): string {
-        return tokenManager.generateToken(user.login);
-    }
-
-    public async saveCustomer(customer: Customer): Promise<number | Error> {
+    public async saveCustomer(customer: Customer): Promise<Customer | Error> {
         try {
             if (customer.email === undefined || customer.email === null) {
                 return new Error("Email must be informed!");
@@ -62,14 +58,15 @@ class UserService {
             }
 
             customer.user.login = customer.email;
-            const id = await this.save(customer.user);
-            console.log("#Customer1= ", customer);
-            if (id instanceof Number) customer.user.id = Number(id);
+            const savedUser = await this.save(customer.user);
+            if (savedUser instanceof Error) return savedUser;
 
-            console.log("#Customer2= ", customer);
-            savedCustomer = await this.customerRepository.create(customer) as Customer;
+            customer.userId = savedUser.id;
+            customer.user = savedUser!;
 
-            return savedCustomer.id;
+            const saved: any = await this.customerRepository.create({ ...customer });
+
+            return saved.dataValues as Customer;
 
         } catch (error) {
             console.error(error);
@@ -77,20 +74,23 @@ class UserService {
         }
     }
 
-    public async save(user: User): Promise<number | Error> {
+    private async save(user: User): Promise<User> {
+        if (!user.admin || user.admin === null) {
+            user.admin = false;
+        }
+
+        user.password = bcrypt.hashSync(user.password, 13);
+
+        const result: any = await this.userRepository.create({ ...user });
+
+        return result.dataValues as User;
+    }
+
+    public async saveUser(user: User): Promise<number | Error> {
         try {
-            if (!user.admin || user.admin === null) {
-                user.admin = false;
-            }
-    
-            user.password = bcrypt.hashSync(user.password, 13);
-    
-            const result = await this.userRepository.create(user) as User;
-    
-            user.id = result.id;
-    
-            return user.id;
-            
+            const saved = await this.save(user);
+            return saved.id;
+
         } catch (error) {
             console.error(error);
             return error as Error;

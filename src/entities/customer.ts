@@ -20,9 +20,10 @@ export class Customer extends Model<Customer> {
     @Column
     public address!: string;
 
-    @BelongsTo(() => User, 'user_id')
+    @BelongsTo(() => User)
     public user!: User;
 
+    @Column({ field: 'user_id' })
     @ForeignKey(() => User)
     public userId!: number;
 }

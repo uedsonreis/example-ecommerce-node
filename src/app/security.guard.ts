@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
 import env from './env';
+import { User } from '../entities/user';
 
-class TokenManager {
-
+class SecurityGuard {
+    
     private static readonly SECRET: string = env.tokenSecret;
     private static readonly EXPIRES_IN: string = "5h";
     private static readonly COUNT_BEARER: number = 7;
@@ -10,7 +11,7 @@ class TokenManager {
     public isValid(token: string): boolean {
         try {
             token = this.removeBearer(token);
-            const obj = jwt.verify(token, TokenManager.SECRET);
+            const obj = jwt.verify(token, SecurityGuard.SECRET);
             return (obj !== null);
         } catch (err) {
             console.error(err);
@@ -18,21 +19,21 @@ class TokenManager {
         }
     }
 
-    public getLoginFromToken(token: string): object | string | Error {
+    public getInfoFromToken(token: string): string | object | Error {
         try {
             token = this.removeBearer(token);
-            return jwt.verify(token, TokenManager.SECRET);
+            return jwt.verify(token, SecurityGuard.SECRET);
         } catch (error) {
             console.error(error);
             return error;
         }
     }
 
-    public generateToken(login: string): string {
+    public generateToken(user: User): string {
         return jwt.sign(
-            { login },
-            TokenManager.SECRET,
-            { expiresIn: TokenManager.EXPIRES_IN }
+            { userId: user.id },
+            SecurityGuard.SECRET,
+            { expiresIn: SecurityGuard.EXPIRES_IN }
         );
     }
 
@@ -42,8 +43,9 @@ class TokenManager {
     }
 
     private removeBearer(token: string): string {
-        return token.slice(TokenManager.COUNT_BEARER);
+        return token.slice(SecurityGuard.COUNT_BEARER);
     }
+
 }
 
-export default new TokenManager();
+export default new SecurityGuard();

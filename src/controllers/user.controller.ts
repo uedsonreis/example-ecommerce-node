@@ -29,21 +29,21 @@ class UserController {
     public async customer(request: Request, response: Response): Promise<Response> {
         try {
             const customer = request.body as Customer;
-            console.log("@user.controller => customer = ", customer);
+            const { email } = customer;
+            const { password } = customer.user;
 
             let result = await userService.saveCustomer(customer);
 
-            if (result instanceof Number) {
-                const token: string | null = await userService.login(customer.user);
+            if (result instanceof Error) {
+                return response.status(HTTP.BAD_REQUEST).json(result);
+            } else {
+                const token: string | null = await userService.login({ login: email, password } as User);
     
-                if (token) {
+                if (token !== null) {
                     return response.status(HTTP.OK).json(token);
                 } else {
                     return response.status(HTTP.UNAUTHENTICATED).send("Username or password is invalid!");
                 }
-                
-            } else {
-                return response.status(HTTP.BAD_REQUEST).json(result);
             }
         } catch (error) {
             return response.status(HTTP.BAD_REQUEST).json(error);

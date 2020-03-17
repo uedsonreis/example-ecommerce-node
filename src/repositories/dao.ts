@@ -6,6 +6,8 @@ import { User } from '../entities/user';
 import { Factory } from '../entities/factory';
 import { Product } from '../entities/product';
 import { Customer } from '../entities/customer';
+import { SalesOrder } from '../entities/sales.order';
+import { Item } from '../entities/item';
 
 class DataAccessObject {
 
@@ -24,7 +26,7 @@ class DataAccessObject {
         });
 
         this.sequelize.addModels([
-            User, Factory, Product, Customer
+            User, Factory, Product, Customer, SalesOrder, Item
         ]);
     }
 
@@ -42,6 +44,14 @@ class DataAccessObject {
 
     public getCustomerRepository(): ModelCtor<Customer> {
         return Customer;
+    }
+
+    public getSalesOrderRepository(): ModelCtor<SalesOrder> {
+        return SalesOrder;
+    }
+
+    public getItemRepository(): ModelCtor<Item> {
+        return Item;
     }
 
 }

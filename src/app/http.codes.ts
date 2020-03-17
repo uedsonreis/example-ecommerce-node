@@ -1,8 +1,9 @@
 export default {
-    OK: 200,
-    CREATED: 201,
     BAD_REQUEST: 400,
-    UNAUTHENTICATED: 401,
+    CREATED: 201,
+    NO_CONTENT: 204,
     NOT_FOUND: 404,
+    OK: 200,
+    UNAUTHENTICATED: 401,
     UNPROCESSABLE: 422
 }
