@@ -20,7 +20,7 @@ export class Customer extends Model<Customer> {
     @Column
     public address!: string;
 
-    @BelongsTo(() => User)
+    @BelongsTo(() => User, 'userId')
     public user!: User;
 
     @Column({ field: 'user_id' })

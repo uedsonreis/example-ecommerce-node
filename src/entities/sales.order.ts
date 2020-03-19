@@ -13,9 +13,9 @@ export class SalesOrder extends Model<SalesOrder> {
     public totalValue!: number;
 
     @Column({ field: 'created_at' })
-    public createAt: Date = new Date();
+    public createdAt: Date = new Date();
 
-    @BelongsTo(() => Customer)
+    @BelongsTo(() => Customer, 'customerId')
     public customer!: Customer;
 
     @Column({ field: 'user_id' })

@@ -7,41 +7,52 @@ import { Item } from '../entities/item';
 
 class SalesOrderController {
 
-    public async list(request: Request, response: Response): Promise<Response> {
+    public async list(request: Request, response: Response): Promise<void> {
         try {
             const { userId } = request.body;
 
-            const salesOrders: SalesOrder[] = await salesOrderService.getList({userId});
-    
-            return response.status(HTTP.OK).json(salesOrders);
+            const result = await salesOrderService.getList(userId);
+
+            if (result instanceof Error) {
+                response.status(HTTP.BAD_REQUEST).send(result.message);
+                return;
+            }
+
+            const salesOrders = result as SalesOrder[];
+
+            if (!salesOrders || salesOrders.length < 1) {
+                response.status(HTTP.NO_CONTENT);
+            } else {
+                response.status(HTTP.OK).json(salesOrders);
+            }    
             
         } catch (error) {
-            return response.status(HTTP.BAD_REQUEST).json(error);
+            response.status(HTTP.BAD_REQUEST).send(error.message);
         }
     }
 
-    public async invoice(request: Request, response: Response): Promise<Response> {
+    public async invoice(request: Request, response: Response): Promise<void> {
         try {
             const userId = request.body.userId;
             let cart = request.body as Item[];
             cart = cart.slice(0, cart.length);
 
             if (!cart || cart.length < 1) {
-                return response.status(HTTP.NO_CONTENT);
+                response.status(HTTP.NO_CONTENT);
+                return;
             }
     
             const result = await salesOrderService.invoice(userId, cart);
 
             if (result instanceof Error) {
-                return response.status(HTTP.BAD_REQUEST).json(result);
+                response.status(HTTP.BAD_REQUEST).send(result.message);
+                return;
             }
-
-            const salesOrder: SalesOrder = result;
     
-            return response.status(HTTP.OK).json(salesOrder);
+            response.status(HTTP.OK).json(result);
             
         } catch (error) {
-            return response.status(HTTP.BAD_REQUEST).json(error);
+            response.status(HTTP.BAD_REQUEST).send(error.message);
         }
     }
 

@@ -1,10 +1,11 @@
 import dao from '../repositories/dao';
-import { WhereOptions, Model } from 'sequelize/types';
+import { WhereOptions, Includeable } from 'sequelize/types';
 
 import { Item } from '../entities/item';
 import { SalesOrder } from '../entities/sales.order';
 import { Customer } from '../entities/customer';
 import { Product } from '../entities/product';
+import { Factory } from '../entities/factory';
 
 class SalesOrderService {
 
@@ -12,6 +13,13 @@ class SalesOrderService {
     private customerRepository = dao.getCustomerRepository();
     private productRepository = dao.getProductRepository();
     private itemRepository = dao.getItemRepository();
+
+    private include: Includeable[] = [
+        Customer,
+        { model: Item, as: 'items', include: [ 
+            { model: Product, as: 'product', include: [ Factory ] }
+        ]}
+    ];
 
     public async invoice(userId: number, cart: Item[]): Promise<SalesOrder | Error> {
         let customer: Customer;
@@ -26,7 +34,7 @@ class SalesOrderService {
         try {
             let salesOrder = { customer: customer, customerId: customer.id } as SalesOrder;
             
-            const result: any = await this.salesOrderRepository.create(salesOrder);
+            let result: any = await this.salesOrderRepository.create(salesOrder);
             salesOrder = result.dataValues as SalesOrder;
 
             for (const item of cart) {
@@ -44,10 +52,18 @@ class SalesOrderService {
                 product.amount = product.amount - item.amount;
                 salesOrder.totalValue += item.price * item.amount;
                 
+                item.product = product;
                 item.productId = product.id;
                 item.salesOrderId = salesOrder.id;
-                this.itemRepository.create(item);
+                await this.itemRepository.create(item);
             }
+
+            salesOrder.items = cart;
+
+            await this.salesOrderRepository.update(salesOrder, {
+                where: { id: salesOrder.id },
+                fields: [ "totalValue" ]
+            });
             
             return salesOrder;
             
@@ -57,14 +73,19 @@ class SalesOrderService {
         }
     }
 
-    public async getList(filter?: any): Promise<SalesOrder[]> {
+    public async getList(userId: number, filter?: any): Promise<SalesOrder[] | Error> {
         try {
-            let where: WhereOptions | undefined = undefined;
+            let result: any = await this.customerRepository.findOne({ where: { userId } });
+            const customer = result.dataValues as Customer;
+
+            if (!customer) {
+                return new Error("You must log as Customer.");
+            }
+
+            let where: WhereOptions = { customerId: customer.id, ...filter };
     
-            if (filter) where = { ...filter };
-    
-            const result: Model<SalesOrder>[] = await this.salesOrderRepository.findAll({
-                include: [ Customer, Item ], where
+            result = await this.salesOrderRepository.findAll({
+                include: this.include, where
             });
     
             return result as SalesOrder[];

@@ -6,7 +6,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 
 import env from './env';
-import router from './router';
+import routes from './router';
 
 class ServiceApp {
 
@@ -28,7 +28,7 @@ class ServiceApp {
     }
 
     private configRoutes(): void {
-        this.express.use('/', router);
+        this.express.use('/', routes);
     }
 
     public startService(): void {

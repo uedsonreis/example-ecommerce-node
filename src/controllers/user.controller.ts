@@ -7,7 +7,7 @@ import { Customer } from '../entities/customer';
 
 class UserController {
 
-    public async login(request: Request, response: Response): Promise<Response> {
+    public async login(request: Request, response: Response): Promise<void> {
         try {
             const { login, password } = request.body;
     
@@ -16,17 +16,17 @@ class UserController {
             const token: string | null = await userService.login(user);
     
             if (token) {
-                return response.status(HTTP.OK).json(token);
+                response.status(HTTP.OK).json(token);
             } else {
-                return response.status(HTTP.UNAUTHENTICATED).send("Username or password is invalid!");
+                response.status(HTTP.UNAUTHENTICATED).send("Username or password is invalid!");
             }
             
         } catch (error) {
-            return response.status(HTTP.BAD_REQUEST).json(error);
+            response.status(HTTP.BAD_REQUEST).send(error.message);
         }
     }
 
-    public async customer(request: Request, response: Response): Promise<Response> {
+    public async customer(request: Request, response: Response): Promise<void> {
         try {
             const customer = request.body as Customer;
             const { email } = customer;
@@ -35,18 +35,18 @@ class UserController {
             let result = await userService.saveCustomer(customer);
 
             if (result instanceof Error) {
-                return response.status(HTTP.BAD_REQUEST).json(result);
+                response.status(HTTP.BAD_REQUEST).send(result.message);
             } else {
                 const token: string | null = await userService.login({ login: email, password } as User);
     
                 if (token !== null) {
-                    return response.status(HTTP.OK).json(token);
+                    response.status(HTTP.OK).json(token);
                 } else {
-                    return response.status(HTTP.UNAUTHENTICATED).send("Username or password is invalid!");
+                    response.status(HTTP.UNAUTHENTICATED).send("Username or password is invalid!");
                 }
             }
         } catch (error) {
-            return response.status(HTTP.BAD_REQUEST).json(error);
+            response.status(HTTP.BAD_REQUEST).send(error.message);
         }
     }
 

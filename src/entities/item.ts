@@ -15,14 +15,14 @@ export class Item extends Model<Item> {
     @Column
     public amount!: number;
 
-    @BelongsTo(() => Product)
+    @BelongsTo(() => Product, 'productId')
     public product!: Product;
 
     @Column({ field: 'product_id' })
     @ForeignKey(() => Product)
     public productId!: number;
     
-    @BelongsTo(() => SalesOrder)
+    @BelongsTo(() => SalesOrder, 'salesOrderId')
     public salesOrder!: SalesOrder;
 
     @Column({ field: 'sales_order_id' })

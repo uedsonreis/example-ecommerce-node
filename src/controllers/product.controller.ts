@@ -6,16 +6,16 @@ import { Product } from '../entities/product';
 
 class ProductController {
 
-    public async list(request: Request, response: Response): Promise<Response> {
+    public async list(request: Request, response: Response): Promise<void> {
         try {
             const { filter } = request.body;
     
             const products: Product[] = await productService.getList(filter);
     
-            return response.status(HTTP.OK).json(products);
+            response.status(HTTP.OK).json(products);
             
         } catch (error) {
-            return response.status(HTTP.BAD_REQUEST).json(error);
+            response.status(HTTP.BAD_REQUEST).send(error.message);
         }
     }
 
