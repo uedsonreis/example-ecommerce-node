@@ -10,7 +10,7 @@ import routes from './router';
 
 class ServiceApp {
 
-    public express: express.Express;
+    private express: express.Express;
 
     constructor() {
         this.express = express();
@@ -32,7 +32,9 @@ class ServiceApp {
     }
 
     public startService(): void {
-        this.express.listen(env.portServer, () => console.log("Serviço rodando na porta %s!", env.portServer));
+        this.express.listen(env.portServer,
+            () => console.log("Serviço rodando na porta %s!", env.portServer)
+        );
     }
 }
 
